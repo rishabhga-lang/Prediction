@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trick Prediction — Online Card Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div id="toast" class="toast hidden"></div>
+
+  <button id="btn-chat-toggle" type="button" class="btn-chat-toggle hidden" title="Chat">💬</button>
+  <div id="chat-panel" class="chat-panel hidden">
+    <div class="chat-header">
+      <span>Room chat</span>
+      <button id="btn-close-chat" type="button" class="chat-close" aria-label="Close chat">×</button>
+    </div>
+    <ul id="chat-messages" class="chat-messages"></ul>
+    <form id="chat-form" class="chat-form">
+      <input id="chat-input" type="text" maxlength="200" placeholder="Type a message…" autocomplete="off" />
+      <button type="submit" class="btn btn-primary btn-chat-send">Send</button>
+    </form>
+  </div>
+
+  <!-- Landing -->
+  <section id="screen-landing" class="screen active">
+    <div class="hero">
+      <h1>Trick Prediction</h1>
+      <p class="tagline">Trump rotates each round. Predict your tricks. Beat your friends.</p>
+    </div>
+    <div class="panel card-panel">
+      <label class="field">
+        <span>Your name</span>
+        <input id="input-name" type="text" maxlength="20" placeholder="Enter your name" autocomplete="nickname" />
+      </label>
+      <div class="actions">
+        <button id="btn-create" class="btn btn-primary">Create Room</button>
+        <div class="divider"><span>or join</span></div>
+        <label class="field">
+          <span>Room code</span>
+          <input id="input-code" type="text" maxlength="6" placeholder="ABC123" class="code-input" />
+        </label>
+        <button id="btn-join" class="btn btn-secondary">Join Room</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lobby -->
+  <section id="screen-lobby" class="screen">
+    <div class="lobby-header">
+      <h2>Game Lobby</h2>
+      <div class="room-code-box">
+        <span class="label">Share this code</span>
+        <code id="display-room-code">------</code>
+        <button id="btn-copy-code" class="btn btn-small" title="Copy code">Copy</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Players <span id="player-count">0</span>/6</h3>
+      <ul id="lobby-players" class="player-list"></ul>
+      <p class="hint">2–6 players. Trump: ♠ → ♥ → ♣ → ♦ each round.</p>
+      <button id="btn-start" class="btn btn-primary hidden">Start Game</button>
+      <p id="waiting-host" class="hint">Waiting for host to start…</p>
+      <button id="btn-leave-lobby" class="btn btn-secondary btn-leave-lobby">Leave room</button>
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section id="screen-game" class="screen">
+    <header class="game-header">
+      <div class="round-info">
+        <span id="round-label">Round 1</span>
+        <span class="sep">·</span>
+        <span id="trick-label">Trick 1/1</span>
+      </div>
+      <div id="trump-badge" class="trump-badge">Trump: <span class="trump-symbol black">♠</span> Spades</div>
+      <div class="header-actions">
+        <button id="btn-scores" class="btn btn-small">Scores</button>
+        <button id="btn-leave" class="btn btn-small btn-leave">Leave room</button>
+      </div>
+    </header>
+
+    <div id="table" class="table">
+      <div id="opponents" class="opponents"></div>
+      <div class="table-center">
+        <p id="phase-message" class="phase-message"></p>
+        <div id="predictions-board" class="predictions-board hidden">
+          <h4>Predictions</h4>
+          <ol id="predictions-queue"></ol>
+        </div>
+        <div id="trick-area" class="trick-area"></div>
+      </div>
+      <div class="my-zone">
+        <div id="my-stats" class="my-stats"></div>
+        <div id="my-hand" class="hand"></div>
+      </div>
+    </div>
+
+    <!-- Prediction overlay -->
+    <div id="prediction-modal" class="modal hidden">
+      <button
+        id="btn-peek-predictions"
+        type="button"
+        class="btn-peek hidden"
+        title="Peek at predictions behind"
+        aria-label="Peek at predictions"
+      >👁</button>
+      <div class="modal-content">
+        <h3 id="pred-modal-title">Your prediction</h3>
+        <p id="pred-modal-desc">How many tricks will you win this round?</p>
+        <div class="pred-controls">
+          <button class="btn-pred" data-delta="-1">−</button>
+          <span id="pred-value" class="pred-value">0</span>
+          <button class="btn-pred" data-delta="1">+</button>
+        </div>
+        <p class="pred-range">0 – <span id="pred-max">0</span></p>
+        <button id="btn-submit-pred" class="btn btn-primary">Lock prediction</button>
+        <p id="pred-waiting" class="hint hidden">Prediction locked — waiting for others…</p>
+      </div>
+    </div>
+
+    <!-- Round results overlay -->
+    <div id="round-modal" class="modal hidden">
+      <div class="modal-content modal-wide">
+        <h3>Round results</h3>
+        <ul id="round-results-list"></ul>
+        <button id="btn-next-round" class="btn btn-primary hidden">Next round</button>
+        <p id="round-wait-host" class="hint hidden">Waiting for host…</p>
+      </div>
+    </div>
+
+    <!-- Scores drawer -->
+    <div id="scores-drawer" class="drawer hidden">
+      <div class="drawer-content">
+        <button id="btn-close-scores" class="drawer-close">×</button>
+        <h3>Scoreboard</h3>
+        <ul id="scores-list"></ul>
+      </div>
+    </div>
+
+    <!-- Game over -->
+    <div id="gameover-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>🏆 Final standings</h3>
+        <ol id="final-standings"></ol>
+        <button id="btn-play-again" class="btn btn-primary">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

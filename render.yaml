@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: trick-prediction-game
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
